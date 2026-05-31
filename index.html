@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="5×5">
+<meta name="theme-color" content="#ffffff">
+<title>5×5 강함</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  :root {
+    --bg:       #f7f7f5;
+    --surface:  #ffffff;
+    --surface2: #f2f2ef;
+    --border:   #e8e8e4;
+    --border2:  #d4d4ce;
+    --text:     #1a1a18;
+    --text2:    #6b6b65;
+    --text3:    #b0b0a8;
+    --squat:    #e8480a;
+    --bench:    #1a6ef5;
+    --dead:     #7c3aed;
+    --success:  #16a34a;
+    --danger:   #dc2626;
+    --warn:     #d97706;
+    --accent:   #1a1a18;
+    --radius:   16px;
+    --radius-sm:10px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bot: env(safe-area-inset-bottom, 0px);
+    --font: 'DM Sans', sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html { background: var(--bg); }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100dvh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(247,247,245,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: calc(12px + var(--safe-top)) 20px 12px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .header-logo {
+    display: flex; align-items: baseline; gap: 6px;
+  }
+  .header-title {
+    font-size: 20px; font-weight: 800; letter-spacing: -0.5px; color: var(--text);
+  }
+  .header-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--squat);
+    margin-bottom: 2px; flex-shrink: 0;
+  }
+  .header-sub { font-size: 11px; color: var(--text3); letter-spacing: 0.3px; text-transform: uppercase; font-weight: 500; }
+  .btn-icon {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text2); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .btn-icon:active { background: var(--surface2); }
+
+  /* ── NAV ── */
+  .nav {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(247,247,245,0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding-bottom: var(--safe-bot);
+  }
+  .nav-btn {
+    flex: 1; padding: 10px 0 8px;
+    background: none; border: none; color: var(--text3);
+    font-size: 10px; font-family: var(--font); font-weight: 500;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    cursor: pointer; transition: color 0.15s;
+  }
+  .nav-btn svg { stroke: currentColor; }
+  .nav-btn.active { color: var(--text); }
+  .nav-btn.active svg { stroke: var(--text); }
+
+  /* ── PAGES ── */
+  .page { display: none; padding: 0 0 88px; }
+  .page.active { display: block; }
+
+  /* ── READY SCREEN ── */
+  .ready-screen { padding: 24px 20px; }
+  .ready-eyebrow {
+    font-size: 11px; font-weight: 600; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;
+  }
+  .ready-heading {
+    font-size: 34px; font-weight: 800; letter-spacing: -1px;
+    color: var(--text); margin-bottom: 24px; line-height: 1.1;
+  }
+  .ready-heading span { color: var(--text3); }
+
+  .last-hint {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 16px; margin-bottom: 16px;
+  }
+  .last-hint-label {
+    font-size: 10px; font-weight: 700; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px;
+  }
+  .last-hint-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .lhchip {
+    font-size: 12px; font-weight: 500; color: var(--text2);
+    display: flex; align-items: center; gap: 5px;
+  }
+  .lhchip strong { color: var(--text); font-weight: 700; }
+  .lhchip-result { font-size: 11px; }
+
+  .ready-lifts { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+  .ready-lift-row {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .rl-left { display: flex; align-items: center; gap: 12px; }
+  .lift-pill {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .lift-pill svg { width: 18px; height: 18px; }
+  .rl-name { font-size: 15px; font-weight: 700; color: var(--text); }
+  .rl-sets { font-size: 12px; color: var(--text3); margin-top: 1px; font-weight: 500; }
+  .rl-right { text-align: right; }
+  .rl-weight {
+    font-family: var(--mono); font-size: 20px; font-weight: 500; color: var(--text);
+    letter-spacing: -0.5px;
+  }
+  .rl-unit { font-size: 12px; color: var(--text3); }
+  .fail-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 8px;
+    border-radius: 20px; margin-top: 4px; display: inline-block;
+  }
+  .fail-badge.f1 { background: #fef3c7; color: var(--warn); }
+  .fail-badge.f2 { background: #fee2e2; color: var(--danger); }
+
+  .btn-start {
+    width: 100%; padding: 18px;
+    background: var(--text); border: none; border-radius: var(--radius);
+    color: var(--bg); font-size: 16px; font-weight: 700;
+    font-family: var(--font); cursor: pointer; letter-spacing: -0.2px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: opacity 0.15s;
+  }
+  .btn-start:active { opacity: 0.8; }
+
+  /* ── ACTIVE SCREEN ── */
+  .active-screen { display: none; }
+  .workout-topbar {
+    padding: 14px 20px 8px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .topbar-date { font-size: 13px; color: var(--text2); font-weight: 500; }
+  .topbar-badge {
+    font-size: 11px; font-weight: 700; color: var(--text2);
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 4px 10px;
+  }
+  .progress-wrap { padding: 0 20px 16px; display: flex; align-items: center; gap: 12px; }
+  .progress-bar { flex: 1; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 2px; background: var(--text); transition: width 0.3s; }
+  .progress-label { font-size: 11px; color: var(--text3); font-family: var(--mono); min-width: 36px; text-align: right; }
+
+  /* ── LIFT CARD ── */
+  .lift-card {
+    margin: 0 16px 12px;
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .lift-card.state-success { border-color: var(--success); }
+  .lift-card.state-fail { border-color: var(--danger); }
+
+  .lift-card-header { padding: 14px 16px 12px; display: flex; align-items: center; justify-content: space-between; }
+  .lc-left { display: flex; align-items: center; gap: 10px; }
+  .lc-pill {
+    width: 32px; height: 32px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .lc-pill svg { width: 16px; height: 16px; }
+  .lc-name { font-size: 16px; font-weight: 700; color: var(--text); }
+  .lc-tag {
+    font-size: 10px; font-weight: 700; padding: 2px 7px;
+    border-radius: 6px; margin-left: 6px; letter-spacing: 0.3px;
+  }
+  .weight-ctrl { display: flex; align-items: center; gap: 10px; }
+  .wbtn {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); font-size: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 300; transition: background 0.1s;
+  }
+  .wbtn:active { background: var(--border); }
+  .wval {
+    font-family: var(--mono); font-size: 20px; font-weight: 500;
+    min-width: 64px; text-align: center; color: var(--text);
+  }
+  .wunit { font-size: 11px; color: var(--text3); font-family: var(--font); font-weight: 500; }
+
+  /* SETS */
+  .sets-row { padding: 0 16px 12px; display: flex; gap: 6px; }
+  .set-btn {
+    flex: 1; height: 46px; border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border); background: var(--surface2);
+    color: var(--text3); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 2px;
+    font-family: var(--font); font-weight: 600; font-size: 13px;
+    transition: all 0.15s;
+  }
+  .set-btn.done {
+    background: var(--surface); border-color: currentColor;
+    color: inherit;
+  }
+  .set-btn.locked { cursor: not-allowed; opacity: 0.35; }
+  .set-btn.single { flex: none; width: 80px; height: 50px; }
+  .set-num { font-size: 9px; font-weight: 600; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.3px; }
+
+  /* DIVIDER */
+  .card-divider { height: 1px; background: var(--border); margin: 0 16px; }
+
+  /* RESULT BUTTONS */
+  .result-row { padding: 12px 16px; display: flex; gap: 8px; }
+  .result-btn {
+    flex: 1; padding: 11px 8px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border); background: transparent;
+    font-size: 13px; font-weight: 700; font-family: var(--font);
+    cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .result-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+  .result-btn.success-btn { color: var(--success); }
+  .result-btn.fail-btn { color: var(--danger); }
+  .result-btn.selected-success {
+    background: #f0fdf4; border-color: var(--success); color: var(--success);
+  }
+  .result-btn.selected-fail {
+    background: #fef2f2; border-color: var(--danger); color: var(--danger);
+  }
+  .result-btn:active { transform: scale(0.96); }
+
+  /* SAVE BAR */
+  .save-bar { padding: 8px 16px 4px; }
+  .btn-save {
+    width: 100%; padding: 16px;
+    border-radius: var(--radius); border: 1.5px solid var(--border);
+    background: var(--surface2); color: var(--text3);
+    font-size: 14px; font-weight: 700; font-family: var(--font);
+    cursor: not-allowed; transition: all 0.2s; letter-spacing: -0.1px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-save.ready {
+    background: var(--text); border-color: var(--text); color: #fff;
+    cursor: pointer;
+  }
+  .btn-save.ready:active { opacity: 0.85; }
+  .btn-save svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  /* ── SUMMARY SHEET ── */
+  .overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(26,26,24,0.4);
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    align-items: flex-end; justify-content: center;
+  }
+  .overlay.show { display: flex; }
+  .sheet {
+    background: var(--surface); border-radius: 24px 24px 0 0;
+    border-top: 1px solid var(--border);
+    padding: 8px 20px calc(28px + var(--safe-bot));
+    width: 100%; animation: slideUp 0.28s cubic-bezier(0.32,0.72,0,1);
+    max-height: 90dvh; overflow-y: auto;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .sheet-handle {
+    width: 36px; height: 4px; border-radius: 2px;
+    background: var(--border2); margin: 12px auto 20px;
+  }
+  .sheet-emoji { font-size: 40px; text-align: center; margin-bottom: 8px; }
+  .sheet-title { font-size: 22px; font-weight: 800; text-align: center; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .sheet-sub { font-size: 13px; color: var(--text2); text-align: center; margin-bottom: 20px; line-height: 1.5; }
+
+  .deload-alert {
+    background: #fef2f2; border: 1px solid #fecaca;
+    border-radius: var(--radius-sm); padding: 12px 14px;
+    margin-bottom: 16px; font-size: 13px; color: var(--danger); line-height: 1.6;
+  }
+  .deload-alert strong { font-weight: 800; }
+
+  .result-summary { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+  .rs-row {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface2); border-radius: var(--radius-sm); padding: 12px 14px;
+    border: 1px solid var(--border);
+  }
+  .rs-left { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; }
+  .rs-pill { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .rs-pill svg { width: 14px; height: 14px; }
+  .rs-badge {
+    font-size: 11px; font-weight: 700; padding: 2px 8px;
+    border-radius: 6px;
+  }
+  .rs-badge.ok { background: #f0fdf4; color: var(--success); }
+  .rs-badge.fail { background: #fef2f2; color: var(--danger); }
+  .rs-right { text-align: right; }
+  .rs-cur { font-size: 13px; color: var(--text2); font-family: var(--mono); }
+  .rs-next { font-size: 13px; font-weight: 700; font-family: var(--mono); margin-top: 2px; }
+
+  .sheet-actions { display: flex; flex-direction: column; gap: 10px; }
+  .btn-confirm {
+    width: 100%; padding: 17px; border-radius: var(--radius);
+    background: var(--text); border: none; color: #fff;
+    font-size: 15px; font-weight: 700; font-family: var(--font);
+    cursor: pointer; letter-spacing: -0.2px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-confirm:active { opacity: 0.85; }
+  .btn-confirm svg { width: 16px; height: 16px; }
+  .btn-back {
+    width: 100%; padding: 14px; border-radius: var(--radius);
+    background: transparent; border: 1.5px solid var(--border);
+    color: var(--text2); font-size: 14px; font-weight: 600;
+    font-family: var(--font); cursor: pointer;
+  }
+
+  /* ── HISTORY ── */
+  .section-title {
+    padding: 20px 20px 12px;
+    font-size: 11px; font-weight: 700; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.8px;
+  }
+  .empty { padding: 60px 20px; text-align: center; color: var(--text3); font-size: 15px; }
+
+  .hist-item {
+    margin: 0 16px 10px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 16px;
+  }
+  .hist-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .hist-date { font-size: 13px; color: var(--text2); font-weight: 500; }
+  .hist-num { font-size: 11px; font-weight: 700; color: var(--text3); margin-top: 2px; }
+  .hist-lifts { display: flex; gap: 8px; flex-wrap: wrap; }
+  .hchip {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 5px 10px; font-size: 12px;
+  }
+  .hchip-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .hchip-name { color: var(--text2); font-weight: 500; }
+  .hchip-w { font-weight: 700; color: var(--text); font-family: var(--mono); }
+  .hchip-r { font-size: 11px; font-weight: 700; margin-left: 1px; }
+  .hchip-r.ok { color: var(--success); }
+  .hchip-r.fail { color: var(--danger); }
+  .btn-del { background: none; border: none; color: var(--text3); cursor: pointer; padding: 2px 4px; }
+  .btn-del svg { width: 16px; height: 16px; stroke: currentColor; }
+
+  /* ── STATS ── */
+  .stats-grid { padding: 0 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px;
+  }
+  .stat-label { font-size: 10px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.6px; }
+  .stat-val { font-size: 30px; font-weight: 800; margin-top: 6px; line-height: 1; letter-spacing: -1px; }
+  .stat-sub { font-size: 11px; color: var(--text3); margin-top: 4px; font-weight: 500; }
+  .pr-list { padding: 0 16px; }
+  .pr-item {
+    display: flex; align-items: center;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; gap: 14px;
+  }
+  .pr-pill { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .pr-pill svg { width: 18px; height: 18px; }
+  .pr-name { flex: 1; font-size: 15px; font-weight: 700; }
+  .pr-right { text-align: right; }
+  .pr-weight { font-size: 22px; font-weight: 800; font-family: var(--mono); letter-spacing: -0.5px; }
+  .pr-unit { font-size: 12px; color: var(--text3); }
+  .pr-date { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  /* ── SETTINGS ── */
+  .settings-section { padding: 0 16px; margin-bottom: 20px; }
+  .srow {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 16px; margin-bottom: 8px;
+  }
+  .srow-left { display: flex; align-items: center; gap: 12px; }
+  .slabel { font-size: 15px; font-weight: 600; }
+  .ssub { font-size: 11px; color: var(--text3); margin-top: 2px; font-weight: 500; }
+  .winput {
+    background: var(--surface2); border: 1.5px solid var(--border);
+    border-radius: 9px; color: var(--text);
+    font-size: 17px; font-weight: 700; font-family: var(--mono);
+    width: 80px; text-align: center; padding: 7px;
+  }
+  .winput:focus { outline: none; border-color: var(--text); }
+  .info-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px; margin-bottom: 8px;
+  }
+  .info-title { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+  .info-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 13px; color: var(--text2); padding: 5px 0;
+    border-bottom: 1px solid var(--border); line-height: 1.5;
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-row svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 1px; }
+  .btn-reset {
+    width: 100%; padding: 14px;
+    background: #fef2f2; border: 1px solid #fecaca;
+    border-radius: var(--radius); color: var(--danger);
+    font-size: 14px; font-weight: 700; font-family: var(--font); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-reset svg { width: 16px; height: 16px; stroke: currentColor; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: calc(88px + 12px); left: 50%;
+    transform: translateX(-50%) translateY(8px);
+    background: var(--text); color: #fff;
+    border-radius: 20px; padding: 10px 18px;
+    font-size: 13px; font-weight: 600; font-family: var(--font);
+    opacity: 0; transition: all 0.25s; z-index: 999;
+    white-space: nowrap; pointer-events: none;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .toast svg { width: 14px; height: 14px; stroke: currentColor; flex-shrink: 0; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">
+    <div class="header-dot"></div>
+    <div>
+      <div class="header-title">5×5 강함</div>
+      <div class="header-sub">StrongLifts</div>
+    </div>
+  </div>
+  <button class="btn-icon" onclick="showPage('settings')" id="settingsBtn">
+    <i data-lucide="settings" style="width:17px;height:17px;stroke:currentColor;"></i>
+  </button>
+</div>
+
+<!-- WORKOUT PAGE -->
+<div class="page active" id="page-workout">
+
+  <!-- READY -->
+  <div class="ready-screen" id="readyScreen">
+    <div class="ready-eyebrow">다음 훈련</div>
+    <div class="ready-heading" id="readyHeading">훈련 <span>#1</span></div>
+
+    <div id="lastHint" class="last-hint" style="display:none">
+      <div class="last-hint-label">지난 훈련</div>
+      <div class="last-hint-chips" id="lastHintChips"></div>
+    </div>
+
+    <div class="ready-lifts" id="readyLifts"></div>
+
+    <button class="btn-start" onclick="startWorkout()">
+      <i data-lucide="dumbbell" style="width:18px;height:18px;stroke:currentColor;"></i>
+      훈련 시작
+    </button>
+  </div>
+
+  <!-- ACTIVE -->
+  <div class="active-screen" id="activeScreen">
+    <div class="workout-topbar" id="workoutTopbar"></div>
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="progress-label" id="progressLabel">0 / 11</div>
+    </div>
+
+    <!-- Squat -->
+    <div class="lift-card" id="card-squat">
+      <div class="lift-card-header">
+        <div class="lc-left">
+          <div class="lc-pill" style="background:#fff3ee;">
+            <i data-lucide="trending-up" style="width:16px;height:16px;stroke:#e8480a;"></i>
+          </div>
+          <div>
+            <div class="lc-name">스쿼트</div>
+          </div>
+        </div>
+        <div class="weight-ctrl">
+          <button class="wbtn" onclick="changeWeight('squat',-1)">−</button>
+          <div class="wval" id="wval-squat">60<span class="wunit">kg</span></div>
+          <button class="wbtn" onclick="changeWeight('squat',1)">+</button>
+        </div>
+      </div>
+      <div class="sets-row" id="sets-squat"></div>
+      <div class="card-divider"></div>
+      <div class="result-row" id="result-squat"></div>
+    </div>
+
+    <!-- Bench -->
+    <div class="lift-card" id="card-bench">
+      <div class="lift-card-header">
+        <div class="lc-left">
+          <div class="lc-pill" style="background:#eff6ff;">
+            <i data-lucide="activity" style="width:16px;height:16px;stroke:#1a6ef5;"></i>
+          </div>
+          <div>
+            <div class="lc-name">벤치프레스</div>
+          </div>
+        </div>
+        <div class="weight-ctrl">
+          <button class="wbtn" onclick="changeWeight('bench',-1)">−</button>
+          <div class="wval" id="wval-bench">50<span class="wunit">kg</span></div>
+          <button class="wbtn" onclick="changeWeight('bench',1)">+</button>
+        </div>
+      </div>
+      <div class="sets-row" id="sets-bench"></div>
+      <div class="card-divider"></div>
+      <div class="result-row" id="result-bench"></div>
+    </div>
+
+    <!-- Deadlift -->
+    <div class="lift-card" id="card-dead">
+      <div class="lift-card-header">
+        <div class="lc-left">
+          <div class="lc-pill" style="background:#f5f3ff;">
+            <i data-lucide="zap" style="width:16px;height:16px;stroke:#7c3aed;"></i>
+          </div>
+          <div>
+            <div class="lc-name">데드리프트 <span class="lc-tag" style="background:#f5f3ff;color:#7c3aed;">1×5</span></div>
+          </div>
+        </div>
+        <div class="weight-ctrl">
+          <button class="wbtn" onclick="changeWeight('dead',-1)">−</button>
+          <div class="wval" id="wval-dead">80<span class="wunit">kg</span></div>
+          <button class="wbtn" onclick="changeWeight('dead',1)">+</button>
+        </div>
+      </div>
+      <div class="sets-row" id="sets-dead" style="justify-content:center;"></div>
+      <div class="card-divider"></div>
+      <div class="result-row" id="result-dead"></div>
+    </div>
+
+    <div class="save-bar">
+      <button class="btn-save" id="btnSave" onclick="openSummary()">
+        <i data-lucide="circle" style="width:16px;height:16px;stroke:currentColor;" id="saveIcon"></i>
+        <span id="saveLabel">모든 종목 결과를 선택해주세요</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- SUMMARY OVERLAY -->
+<div class="overlay" id="summaryOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-emoji" id="sumEmoji">💪</div>
+    <div class="sheet-title" id="sumTitle">훈련 완료</div>
+    <div class="sheet-sub" id="sumSub"></div>
+    <div id="deloadAlert" class="deload-alert" style="display:none"></div>
+    <div class="result-summary" id="resultSummary"></div>
+    <div class="sheet-actions">
+      <button class="btn-confirm" onclick="finishWorkout()">
+        <i data-lucide="check" style="width:16px;height:16px;stroke:currentColor;"></i>
+        저장하고 다음 훈련 준비
+      </button>
+      <button class="btn-back" onclick="closeSummary()">돌아가기</button>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY PAGE -->
+<div class="page" id="page-history">
+  <div class="section-title">훈련 기록</div>
+  <div id="historyList"></div>
+</div>
+
+<!-- STATS PAGE -->
+<div class="page" id="page-stats">
+  <div class="section-title">통계</div>
+  <div class="stats-grid" id="statsGrid"></div>
+  <div class="section-title">개인 최고 기록</div>
+  <div class="pr-list" id="prList"></div>
+</div>
+
+<!-- SETTINGS PAGE -->
+<div class="page" id="page-settings">
+  <div class="section-title">현재 무게</div>
+  <div class="settings-section">
+    <div class="srow">
+      <div class="srow-left">
+        <div class="lc-pill" style="background:#fff3ee;"><i data-lucide="trending-up" style="width:15px;height:15px;stroke:#e8480a;"></i></div>
+        <div><div class="slabel">스쿼트</div><div class="ssub">+2.5kg / 훈련</div></div>
+      </div>
+      <input class="winput" type="number" id="set-squat" step="2.5" min="20">
+    </div>
+    <div class="srow">
+      <div class="srow-left">
+        <div class="lc-pill" style="background:#eff6ff;"><i data-lucide="activity" style="width:15px;height:15px;stroke:#1a6ef5;"></i></div>
+        <div><div class="slabel">벤치프레스</div><div class="ssub">+2.5kg / 훈련</div></div>
+      </div>
+      <input class="winput" type="number" id="set-bench" step="2.5" min="20">
+    </div>
+    <div class="srow">
+      <div class="srow-left">
+        <div class="lc-pill" style="background:#f5f3ff;"><i data-lucide="zap" style="width:15px;height:15px;stroke:#7c3aed;"></i></div>
+        <div><div class="slabel">데드리프트</div><div class="ssub">+5kg → 이후 +2.5kg</div></div>
+      </div>
+      <input class="winput" type="number" id="set-dead" step="2.5" min="20">
+    </div>
+  </div>
+  <div class="section-title">규칙</div>
+  <div class="settings-section">
+    <div class="info-card">
+      <div class="info-title">StrongLifts 5×5 메커니즘</div>
+      <div class="info-row">
+        <i data-lucide="check-circle" style="stroke:#16a34a;"></i>
+        <span>5×5 성공 → 다음 훈련 증량</span>
+      </div>
+      <div class="info-row">
+        <i data-lucide="x-circle" style="stroke:#dc2626;"></i>
+        <span>실패 → 무게 유지</span>
+      </div>
+      <div class="info-row">
+        <i data-lucide="alert-triangle" style="stroke:#d97706;"></i>
+        <span>3연속 실패 → 현재 무게 10% 감량 (디로드)</span>
+      </div>
+      <div class="info-row">
+        <i data-lucide="layers" style="stroke:#7c3aed;"></i>
+        <span>데드리프트는 1세트 × 5회</span>
+      </div>
+    </div>
+    <button class="btn-reset" onclick="confirmReset()">
+      <i data-lucide="trash-2"></i>
+      모든 기록 초기화
+    </button>
+  </div>
+</div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showPage('workout')" id="nav-workout">
+    <i data-lucide="dumbbell" style="width:22px;height:22px;"></i>
+    <span>훈련</span>
+  </button>
+  <button class="nav-btn" onclick="showPage('history')" id="nav-history">
+    <i data-lucide="list" style="width:22px;height:22px;"></i>
+    <span>기록</span>
+  </button>
+  <button class="nav-btn" onclick="showPage('stats')" id="nav-stats">
+    <i data-lucide="bar-chart-2" style="width:22px;height:22px;"></i>
+    <span>통계</span>
+  </button>
+  <button class="nav-btn" onclick="showPage('settings')" id="nav-settings">
+    <i data-lucide="settings" style="width:22px;height:22px;"></i>
+    <span>설정</span>
+  </button>
+</nav>
+
+<div class="toast" id="toast">
+  <i data-lucide="check" style="width:14px;height:14px;stroke:currentColor;"></i>
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+const LIFTS = ['squat','bench','dead'];
+const NAMES = { squat:'스쿼트', bench:'벤치프레스', dead:'데드리프트' };
+const COLORS = { squat:'#e8480a', bench:'#1a6ef5', dead:'#7c3aed' };
+const PILL_BG = { squat:'#fff3ee', bench:'#eff6ff', dead:'#f5f3ff' };
+const ICONS = { squat:'trending-up', bench:'activity', dead:'zap' };
+const INC = { squat:2.5, bench:2.5, dead:5 };
+const MAX_SETS = { squat:5, bench:5, dead:1 };
+
+function load(){ try{ return JSON.parse(localStorage.getItem('fx5_v3'))||{}; }catch{ return {}; } }
+function persist(){ localStorage.setItem('fx5_v3', JSON.stringify(S)); }
+
+let S = load();
+if(!S.weights)  S.weights  = { squat:60, bench:50, dead:80 };
+if(!S.fails)    S.fails    = { squat:0, bench:0, dead:0 };
+if(!S.history)  S.history  = [];
+if(S.deadBig===undefined) S.deadBig = true;
+if(!S.workoutActive) S.workoutActive = false;
+
+let chosen = { squat:null, bench:null, dead:null };
+let tapped = { squat:0, bench:0, dead:0 };
+
+function round25(v){ return Math.round(v/2.5)*2.5; }
+
+// ── READY ──────────────────────────────────────────────
+function renderReady(){
+  const num = S.history.length + 1;
+  document.getElementById('readyHeading').innerHTML = `훈련 <span>#${num}</span>`;
+
+  document.getElementById('readyLifts').innerHTML = LIFTS.map(k => {
+    const f = S.fails[k]||0;
+    const sets = k==='dead'?'1×5':'5×5';
+    let badge = '';
+    if(f===1) badge = `<div class="fail-badge f1">⚠ 1연속 실패</div>`;
+    if(f===2) badge = `<div class="fail-badge f2">⚠ 2연속 — 다음 실패 시 디로드</div>`;
+    return `
+    <div class="ready-lift-row">
+      <div class="rl-left">
+        <div class="lift-pill" style="background:${PILL_BG[k]}">
+          <i data-lucide="${ICONS[k]}" style="width:18px;height:18px;stroke:${COLORS[k]};"></i>
+        </div>
+        <div>
+          <div class="rl-name">${NAMES[k]}</div>
+          <div class="rl-sets">${sets}</div>
+          ${badge}
+        </div>
+      </div>
+      <div class="rl-right">
+        <span class="rl-weight">${S.weights[k]}</span><span class="rl-unit"> kg</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  if(S.history.length > 0){
+    const last = S.history[0];
+    document.getElementById('lastHint').style.display='block';
+    document.getElementById('lastHintChips').innerHTML = LIFTS.map(k=>`
+      <span class="lhchip">
+        <span style="width:7px;height:7px;border-radius:50%;background:${COLORS[k]};display:inline-block;flex-shrink:0;"></span>
+        ${NAMES[k]} <strong>${last.weights[k]}kg</strong>
+        <span class="lhchip-result" style="color:${last.results[k]==='success'?'var(--success)':'var(--danger)'}">${last.results[k]==='success'?'✓':'✕'}</span>
+      </span>`).join('');
+  }
+  lucide.createIcons();
+}
+
+function startWorkout(){
+  S.workoutActive = true;
+  chosen = { squat:null, bench:null, dead:null };
+  tapped = { squat:0, bench:0, dead:0 };
+  S.inProgress = { chosen:{...chosen}, tapped:{...tapped} };
+  persist();
+  renderActiveScreen();
+}
+
+// ── ACTIVE ─────────────────────────────────────────────
+function renderActiveScreen(){
+  document.getElementById('readyScreen').style.display='none';
+  document.getElementById('activeScreen').style.display='block';
+  const today = new Date().toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'});
+  const num = S.history.length + 1;
+  document.getElementById('workoutTopbar').innerHTML = `
+    <span class="topbar-date">${today}</span>
+    <span class="topbar-badge">훈련 #${num}</span>`;
+  LIFTS.forEach(k => { renderWeightVal(k); renderSets(k); renderResultBtns(k); });
+  updateProgress(); updateSaveBtn();
+  lucide.createIcons();
+}
+
+function renderWeightVal(k){
+  document.getElementById(`wval-${k}`).innerHTML = `${S.weights[k]}<span class="wunit"> kg</span>`;
+}
+
+function renderSets(k){
+  const c = document.getElementById(`sets-${k}`);
+  c.innerHTML = '';
+  const max = MAX_SETS[k];
+  for(let i=0;i<max;i++){
+    const done = i < tapped[k];
+    const locked = i > tapped[k];
+    const btn = document.createElement('button');
+    btn.className='set-btn'+(k==='dead'?' single':'')+(done?' done':'')+(locked?' locked':'');
+    if(done) btn.style.color = COLORS[k];
+    btn.innerHTML = `<span style="font-size:${k==='dead'?'18px':'15px'}">${done?'✓':'·'}</span><span class="set-num">${k==='dead'?'1SET':`${i+1}SET`}</span>`;
+    if(!done && !locked){
+      btn.onclick = () => {
+        tapped[k]++;
+        S.inProgress = { chosen:{...chosen}, tapped:{...tapped} };
+        persist(); renderSets(k); updateProgress();
+      };
+    }
+    c.appendChild(btn);
+  }
+}
+
+function renderResultBtns(k){
+  const c = chosen[k];
+  document.getElementById(`result-${k}`).innerHTML = `
+    <button class="result-btn success-btn ${c==='success'?'selected-success':''}" onclick="setResult('${k}','success')">
+      <i data-lucide="check-circle" style="width:15px;height:15px;stroke:currentColor;"></i> 성공
+    </button>
+    <button class="result-btn fail-btn ${c==='fail'?'selected-fail':''}" onclick="setResult('${k}','fail')">
+      <i data-lucide="x-circle" style="width:15px;height:15px;stroke:currentColor;"></i> 실패
+    </button>`;
+  document.getElementById(`card-${k}`).className = 'lift-card'+(c==='success'?' state-success':(c==='fail'?' state-fail':''));
+  lucide.createIcons();
+}
+
+function setResult(k, val){
+  chosen[k] = val;
+  S.inProgress = { chosen:{...chosen}, tapped:{...tapped} };
+  persist(); renderResultBtns(k); updateSaveBtn();
+}
+
+function changeWeight(k, dir){
+  const inc = k==='dead'?(S.deadBig?5:2.5):INC[k];
+  S.weights[k] = Math.max(20, round25(S.weights[k] + dir * inc));
+  persist(); renderWeightVal(k);
+  if(!S.workoutActive) renderReady();
+}
+
+function updateProgress(){
+  const done = tapped.squat + tapped.bench + tapped.dead;
+  const total = 11;
+  document.getElementById('progressFill').style.width = Math.round(done/total*100)+'%';
+  document.getElementById('progressLabel').textContent = `${done} / ${total}`;
+}
+
+function updateSaveBtn(){
+  const allChosen = LIFTS.every(k => chosen[k] !== null);
+  const btn = document.getElementById('btnSave');
+  const lbl = document.getElementById('saveLabel');
+  const ico = document.getElementById('saveIcon');
+  if(allChosen){
+    btn.classList.add('ready');
+    lbl.textContent = '결과 확인 및 저장';
+    ico.setAttribute('data-lucide','arrow-right');
+  } else {
+    btn.classList.remove('ready');
+    const rem = LIFTS.filter(k=>chosen[k]===null).map(k=>NAMES[k]).join(', ');
+    lbl.textContent = `${rem} — 성공/실패 선택해주세요`;
+    ico.setAttribute('data-lucide','circle');
+  }
+  lucide.createIcons();
+}
+
+// ── SUMMARY ────────────────────────────────────────────
+function openSummary(){
+  if(!LIFTS.every(k=>chosen[k]!==null)) return;
+  function preview(k, res){
+    const f = S.fails[k]||0;
+    if(res==='success'){
+      const inc = k==='dead'?(S.deadBig?5:2.5):INC[k];
+      return { next:round25(S.weights[k]+inc), tag:`+${inc}kg`, color:'var(--success)' };
+    } else {
+      if(f+1>=3) return { next:round25(S.weights[k]*0.9), tag:'−10% 디로드', color:'var(--danger)' };
+      return { next:S.weights[k], tag:'유지', color:'var(--warn)' };
+    }
+  }
+  const prev = {}; LIFTS.forEach(k=>{ prev[k]=preview(k,chosen[k]); });
+  const allOk = LIFTS.every(k=>chosen[k]==='success');
+  const anyDeload = LIFTS.some(k=>chosen[k]==='fail'&&(S.fails[k]||0)+1>=3);
+  document.getElementById('sumEmoji').textContent = allOk?'🏆':(anyDeload?'🔄':'💪');
+  document.getElementById('sumTitle').textContent = allOk?'훈련 완료!':'훈련 저장';
+  document.getElementById('sumSub').textContent = allOk
+    ? '모든 종목 성공! 다음 훈련에서 증량해요'
+    : '실패 종목은 무게를 유지해요';
+
+  const dl = document.getElementById('deloadAlert');
+  const dlLifts = LIFTS.filter(k=>chosen[k]==='fail'&&(S.fails[k]||0)+1>=3).map(k=>NAMES[k]);
+  if(dlLifts.length){ dl.style.display='block'; dl.innerHTML=`<strong>⚠ 디로드 발동</strong><br>${dlLifts.join(', ')} — 3연속 실패로 다음 훈련 무게 10% 감량`; }
+  else dl.style.display='none';
+
+  document.getElementById('resultSummary').innerHTML = LIFTS.map(k=>{
+    const ok = chosen[k]==='success';
+    const p = prev[k];
+    return `
+    <div class="rs-row">
+      <div class="rs-left">
+        <div class="rs-pill" style="background:${PILL_BG[k]}">
+          <i data-lucide="${ICONS[k]}" style="width:14px;height:14px;stroke:${COLORS[k]};"></i>
+        </div>
+        ${NAMES[k]}
+        <span class="rs-badge ${ok?'ok':'fail'}">${ok?'성공':'실패'}</span>
+      </div>
+      <div class="rs-right">
+        <div class="rs-cur">${S.weights[k]}kg</div>
+        <div class="rs-next" style="color:${p.color}">${p.next}kg <span style="font-size:11px;font-family:var(--font)">(${p.tag})</span></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('summaryOverlay').classList.add('show');
+  lucide.createIcons();
+}
+
+function closeSummary(){
+  document.getElementById('summaryOverlay').classList.remove('show');
+}
+
+function finishWorkout(){
+  const entry = { id:Date.now(), date:new Date().toISOString(), num:S.history.length+1, weights:{...S.weights}, tapped:{...tapped}, results:{...chosen} };
+  S.history.unshift(entry);
+  LIFTS.forEach(k=>{
+    if(chosen[k]==='success'){
+      const inc = k==='dead'?(S.deadBig?5:2.5):INC[k];
+      S.weights[k]=round25(S.weights[k]+inc); S.fails[k]=0;
+    } else {
+      const nf=(S.fails[k]||0)+1;
+      if(nf>=3){ S.weights[k]=round25(S.weights[k]*0.9); S.fails[k]=0; if(k==='dead') S.deadBig=false; }
+      else { S.fails[k]=nf; if(k==='dead') S.deadBig=false; }
+    }
+  });
+  S.workoutActive=false; S.inProgress=null; persist();
+  document.getElementById('summaryOverlay').classList.remove('show');
+  chosen={squat:null,bench:null,dead:null}; tapped={squat:0,bench:0,dead:0};
+  document.getElementById('activeScreen').style.display='none';
+  document.getElementById('readyScreen').style.display='block';
+  renderReady();
+  const allOk = LIFTS.every(k=>entry.results[k]==='success');
+  showToast(allOk?'저장 완료! 다음 훈련도 파이팅 🏆':'저장 완료. 다음엔 성공하자! 💪');
+}
+
+// ── HISTORY ────────────────────────────────────────────
+function renderHistory(){
+  const el = document.getElementById('historyList');
+  if(!S.history.length){ el.innerHTML='<div class="empty">아직 기록이 없어요 🏋️</div>'; return; }
+  el.innerHTML = S.history.map((e,i)=>{
+    const d = new Date(e.date).toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
+    return `
+    <div class="hist-item">
+      <div class="hist-header">
+        <div>
+          <div class="hist-date">${d}</div>
+          <div class="hist-num">훈련 #${e.num||S.history.length-i}</div>
+        </div>
+        <button class="btn-del" onclick="delEntry(${i})"><i data-lucide="trash-2"></i></button>
+      </div>
+      <div class="hist-lifts">
+        ${LIFTS.map(k=>`
+        <div class="hchip">
+          <span class="hchip-dot" style="background:${COLORS[k]}"></span>
+          <span class="hchip-name">${NAMES[k]}</span>
+          <span class="hchip-w">${e.weights[k]}kg</span>
+          <span class="hchip-r ${e.results[k]==='success'?'ok':'fail'}">${e.results[k]==='success'?'✓':'✕'}</span>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+  lucide.createIcons();
+}
+
+function delEntry(i){
+  if(!confirm('삭제할까요?')) return;
+  S.history.splice(i,1); persist(); renderHistory(); showToast('삭제됐어요');
+}
+
+// ── STATS ──────────────────────────────────────────────
+function renderStats(){
+  const total = S.history.length;
+  const now = new Date();
+  const month = S.history.filter(e=>{ const d=new Date(e.date); return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear(); }).length;
+  const successRate = total ? Math.round(S.history.filter(e=>LIFTS.every(k=>e.results[k]==='success')).length/total*100) : 0;
+  const maxFail = Math.max(...Object.values(S.fails));
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stat-card"><div class="stat-label">총 훈련</div><div class="stat-val">${total}</div><div class="stat-sub">회</div></div>
+    <div class="stat-card"><div class="stat-label">이번 달</div><div class="stat-val">${month}</div><div class="stat-sub">회</div></div>
+    <div class="stat-card"><div class="stat-label">완전 성공률</div><div class="stat-val" style="color:var(--success)">${successRate}</div><div class="stat-sub">%</div></div>
+    <div class="stat-card"><div class="stat-label">현재 연속 실패</div><div class="stat-val" style="color:${maxFail>0?'var(--warn)':'var(--success)'}">${maxFail}</div><div class="stat-sub">최대</div></div>`;
+  document.getElementById('prList').innerHTML = LIFTS.map(k=>{
+    let prW=0, prDate=null;
+    S.history.forEach(e=>{ if(e.weights[k]&&e.results[k]==='success'&&e.weights[k]>prW){ prW=e.weights[k]; prDate=e.date; } });
+    if(S.weights[k]>prW) prW=S.weights[k];
+    return `
+    <div class="pr-item">
+      <div class="pr-pill" style="background:${PILL_BG[k]}">
+        <i data-lucide="${ICONS[k]}" style="width:18px;height:18px;stroke:${COLORS[k]};"></i>
+      </div>
+      <div class="pr-name">${NAMES[k]}</div>
+      <div class="pr-right">
+        <div class="pr-weight">${prW}<span class="pr-unit"> kg</span></div>
+        <div class="pr-date">${prDate?new Date(prDate).toLocaleDateString('ko-KR',{month:'short',day:'numeric'}):'현재 무게'}</div>
+      </div>
+    </div>`;
+  }).join('');
+  lucide.createIcons();
+}
+
+// ── SETTINGS ───────────────────────────────────────────
+function renderSettings(){
+  LIFTS.forEach(k=>{
+    const el=document.getElementById(`set-${k}`);
+    el.value=S.weights[k];
+    el.oninput=e=>{ const v=parseFloat(e.target.value); if(!isNaN(v)&&v>=20){ S.weights[k]=v; persist(); } };
+  });
+  lucide.createIcons();
+}
+
+function confirmReset(){
+  if(confirm('정말 모든 기록을 초기화할까요?')){ localStorage.removeItem('fx5_v3'); location.reload(); }
+}
+
+// ── NAV ────────────────────────────────────────────────
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(`page-${name}`).classList.add('active');
+  document.getElementById(`nav-${name}`)?.classList.add('active');
+  if(name==='workout') renderWorkoutPage();
+  else if(name==='history') renderHistory();
+  else if(name==='stats') renderStats();
+  else if(name==='settings') renderSettings();
+}
+
+function renderWorkoutPage(){
+  if(S.workoutActive && S.inProgress){
+    chosen = S.inProgress.chosen || {squat:null,bench:null,dead:null};
+    tapped = S.inProgress.tapped || {squat:0,bench:0,dead:0};
+    renderActiveScreen();
+  } else {
+    document.getElementById('activeScreen').style.display='none';
+    document.getElementById('readyScreen').style.display='block';
+    renderReady();
+  }
+}
+
+// ── TOAST ──────────────────────────────────────────────
+function showToast(msg){
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// INIT
+renderWorkoutPage();
+lucide.createIcons();
+</script>
+</body>
+</html>
